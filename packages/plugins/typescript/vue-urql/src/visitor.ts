@@ -88,19 +88,22 @@ export class UrqlVisitor extends ClientSideBaseVisitor<VueUrqlRawPluginConfig, U
 export function use${operationName}() {
   return Urql.use${operationType}<${operationResultType}, ${operationVariablesTypes}>(${documentVariableName});
 };`;
-    }
-
-    if (operationType === 'Subscription') {
+    } else if (operationType === 'Subscription') {
       return `
 export function use${operationName}<R = ${operationResultType}>(options: Omit<Urql.Use${operationType}Args<never, ${operationVariablesTypes}>, 'query'> = {}, handler?: Urql.SubscriptionHandlerArg<${operationResultType}, R>) {
   return Urql.use${operationType}<${operationResultType}, R, ${operationVariablesTypes}>({ query: ${documentVariableName}, ...options }, handler);
 };`;
-    }
-
-    return `
+    } else if (operationType === 'Query') {
+      return `
+export function use${operationName}(options: Omit<Urql.Use${operationType}Args<never, ${operationVariablesTypes}>, 'query'> = {}) {
+  return Urql.use${operationType}<${operationResultType}, ${operationVariablesTypes}>({ query: ${documentVariableName}, ...options });
+};`;
+    } else {
+      return `
 export function use${operationName}(options: Omit<Urql.Use${operationType}Args<never, ${operationVariablesTypes}>, 'query'>) {
   return Urql.use${operationType}<${operationResultType}, ${operationVariablesTypes}>({ query: ${documentVariableName}, ...options });
 };`;
+    }
   }
 
   protected buildOperation(
